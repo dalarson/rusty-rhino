@@ -1,17 +1,19 @@
-import React from 'react'
-import ReactDOM from 'react-dom/client'
-import App from './App.tsx'
-import { MantineProvider } from '@mantine/core'
-import { AuthProvider } from './auth/AuthProvider'
-import "@mantine/core/styles.css"
-import './index.css'
+import { AppShell } from "@mantine/core";
+import { Header } from "./Header/Header";
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-    <MantineProvider defaultColorScheme='dark'>
-      <AuthProvider>
-        <App />
-      </AuthProvider>
-    </MantineProvider>
-  </React.StrictMode>,
-)
+export const Main = (): JSX.Element => {
+
+  return (
+    <AppShell
+      header={{ height: 60 }}
+      padding="md"
+    >
+      <AppShell.Header>
+        <Header title={"Rusty Rhino"}></Header>
+      </AppShell.Header>
+      <AppShell.Main>
+        <>Content</>
+      </AppShell.Main>
+    </AppShell>
+  );
+}

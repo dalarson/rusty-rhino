@@ -1,15 +1,19 @@
 import './App.css'
-import { useEffect } from 'react';
+import "@mantine/core/styles.css"
+import React from 'react';
+import { AuthProvider } from './auth/AuthProvider';
+import { MantineProvider } from '@mantine/core';
+import ReactDOM from 'react-dom/client'
+import { Main } from './Main';
 
-function App() {
-
-  useEffect(() => {document.title = "Rusty Rhino"; }, [])
-
-  return (
-    <>
-      <h1>Rusty Rhino</h1>
-    </>
-  )
-}
-
-export default App
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  <>
+    <React.StrictMode>
+      <MantineProvider defaultColorScheme='dark'>
+        <AuthProvider>
+          <Main />
+        </AuthProvider>
+      </MantineProvider>
+    </React.StrictMode>
+  </>
+);
