@@ -2,11 +2,10 @@ import { UnstyledButton, Group, Menu } from "@mantine/core";
 import { IconChevronDown } from "@tabler/icons-react";
 import { IUserButtonProps } from "./IUserButtonProps";
 import { Text } from "@mantine/core"
-import { useState } from "react";
+// import { useState } from "react";
 
 
 export const UserButton = (props: IUserButtonProps): JSX.Element => {
-    const [_, setUserMenuOpened] = useState(false);
 
     if (props.isAdmin) {
         return (
@@ -14,8 +13,8 @@ export const UserButton = (props: IUserButtonProps): JSX.Element => {
                 width={260}
                 position="bottom-end"
                 transitionProps={{ transition: 'pop-top-right' }}
-                onClose={() => setUserMenuOpened(false)}
-                onOpen={() => setUserMenuOpened(true)}
+                // onClose={() => /* setUserMenuOpened(false) */}
+                // onOpen={() => /* setUserMenuOpened(true) */}
                 withinPortal
             >
                 <Menu.Target>

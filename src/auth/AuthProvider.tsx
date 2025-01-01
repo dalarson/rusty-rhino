@@ -1,4 +1,4 @@
-import { useContext, useState } from "react"
+import { useState } from "react"
 import { AuthContext } from "./AuthContext"
 
 export interface IAuthProviderProps {
@@ -22,6 +22,3 @@ export const AuthProvider = (props: IAuthProviderProps) => {
     return <AuthContext.Provider value={{ isAdmin, name, login, logout }} >{props.children}</AuthContext.Provider>
 }
 
-export const useAuth = () => {
-    return useContext(AuthContext);
-}
