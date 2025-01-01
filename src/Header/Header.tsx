@@ -2,7 +2,7 @@ import { Group } from "@mantine/core";
 import { IHeaderProps } from "./IHeaderProps"
 import { UserButton } from "./UserButton";
 import Rhino from '../assets/Rhino.svg';
-import { useAuth } from "../auth/AuthProvider";
+import { useAuth } from "../auth/useAuth";
 
 export const Header = (props: IHeaderProps): JSX.Element => {
     // set doc title
