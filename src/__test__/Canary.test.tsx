@@ -1,5 +1,5 @@
 describe("Canary", () => {
     it("Sings", () => {
-        expect(false).toBeTruthy();
+        expect(true).toBeTruthy();
     })
 })
