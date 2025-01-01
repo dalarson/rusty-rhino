@@ -6,7 +6,7 @@ import { useState } from "react";
 
 
 export const UserButton = (props: IUserButtonProps): JSX.Element => {
-    const [isUserMenuOpened, setUserMenuOpened] = useState(false);
+    const [_, setUserMenuOpened] = useState(false);
 
     if (props.isAdmin) {
         return (
