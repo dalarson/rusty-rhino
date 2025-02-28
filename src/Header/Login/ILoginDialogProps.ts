@@ -15,5 +15,5 @@ export interface ILoginDialogProps {
      * @param credentials - The credentials the user wishes to login with.
      * @returns - Nothing.
      */
-    onSubmit: (credentials: ICredentials) => void;
+    onSubmit: (credentials: ICredentials) => Promise<void>;
 }

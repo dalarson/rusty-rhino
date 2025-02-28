@@ -1,5 +1,7 @@
 import { useState } from "react"
 import { AuthContext } from "./AuthContext"
+import { ICredentials } from "../Header/Login/ICredentials";
+import { temporaryCredentials } from "../Header/Login/TemporaryCredentials";
 
 export interface IAuthProviderProps {
     children: React.ReactNode;
@@ -7,15 +9,23 @@ export interface IAuthProviderProps {
 
 export const AuthProvider = (props: IAuthProviderProps) => {
     // check whether the user is authenticated
-    const [isAdmin, setIsAdmin] = useState(false);
-    const [name, setName] = useState<string | undefined>(undefined);
-    const login = () => {
-        console.log("Logging in");
-        setIsAdmin(true);
-        setName("Admin");
+    const [isAdmin, setIsAdmin] = useState(true);
+    const [name, setName] = useState<string | undefined>("David");
+    const login = (credentials: ICredentials) => {
+        return new Promise<void>((resolve, reject) => {
+            if (credentials.username === temporaryCredentials.username && credentials.password === temporaryCredentials.password) {
+                setTimeout(() => {
+                    setIsAdmin(true);
+                    setName(credentials.username);
+                    resolve();
+                }, 1000)
+            } else {
+                reject("Invalid credentials");
+            }
+        })
     }
+
     const logout = () => {
-        console.log("Logging out");
         setIsAdmin(false);
         setName(undefined);
     }
