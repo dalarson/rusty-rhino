@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { AuthContext } from "./AuthContext"
-import { ICredentials } from "../Header/Login/ICredentials";
-import { temporaryCredentials } from "../Header/Login/TemporaryCredentials";
+import { ICredentials } from "../header/login/ICredentials";
+import { temporaryCredentials } from "../header/login/TemporaryCredentials";
 
 export interface IAuthProviderProps {
     children: React.ReactNode;

@@ -1,4 +1,4 @@
-import { ICredentials } from "../Header/Login/ICredentials";
+import { ICredentials } from "../header/login/ICredentials";
 
 export interface IUserContext {
     isAdmin: boolean;

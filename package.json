@@ -14,10 +14,12 @@
   "dependencies": {
     "@mantine/core": "^7.7.1",
     "@tabler/icons-react": "^3.24.0",
+    "axios": "^1.8.1",
     "clsx": "^2.1.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "usehooks-ts": "^3.1.1"
+    "usehooks-ts": "^3.1.1",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.6.3",

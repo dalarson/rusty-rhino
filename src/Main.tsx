@@ -1,5 +1,6 @@
 import { AppShell } from "@mantine/core";
-import { Header } from "./Header/Header";
+import { Header } from "./header/Header";
+import { Inventory } from "./inventory/Inventory";
 
 export const Main = (): JSX.Element => {
 
@@ -12,7 +13,7 @@ export const Main = (): JSX.Element => {
                 <Header title={"Rusty Rhino"}></Header>
             </AppShell.Header>
             <AppShell.Main>
-                <>Content</>
+                <Inventory />
             </AppShell.Main>
         </AppShell>
     );

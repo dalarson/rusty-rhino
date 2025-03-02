@@ -1,10 +1,10 @@
 import { Group } from "@mantine/core";
 import { IHeaderProps } from "./IHeaderProps"
-import { UserButton } from "./Login/UserButton";
-import Rhino from '../assets/Rhino.svg';
+import { UserButton } from "./login/UserButton";
+import Rhino from '../../resources/logo/Rhino.svg';
 import { useAuth } from "../auth/useAuth";
-import { LoginDialog } from "./Login/LoginDialog";
-import { ICredentials } from "./Login/ICredentials";
+import { LoginDialog } from "./login/LoginDialog";
+import { ICredentials } from "./login/ICredentials";
 import { useState } from "react";
 
 export const Header = (props: IHeaderProps): JSX.Element => {
