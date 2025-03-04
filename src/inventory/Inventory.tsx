@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { InventoryItem } from "../domain/types/InventoryItem";
 import { Listing } from "./Listing";
 import { TempInventorySvc } from "../domain/services/TempInventorySvc";
@@ -6,7 +6,9 @@ import { SimpleGrid } from "@mantine/core";
 
 
 export const Inventory = (): JSX.Element => {
-    const tempInventorySvc = new TempInventorySvc();
+    const tempInventorySvc = useMemo(() => {
+        return new TempInventorySvc();
+    }, []);
     const [inventory, setInventory] = useState<InventoryItem[]>([]);
 
     useEffect(() => {
