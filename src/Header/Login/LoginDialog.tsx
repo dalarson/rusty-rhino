@@ -12,7 +12,6 @@ export const LoginDialog = (props: ILoginDialogProps): JSX.Element => {
     const [isLoading, setLoading] = useState(false);
 
     const onLoginClick = () => {
-        console.log("Logging in...");
         setLoading(true);
         const creds: ICredentials = {
             username,

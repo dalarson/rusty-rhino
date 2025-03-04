@@ -7,8 +7,8 @@ export type InventoryItem = {
     name: string;
     // a brief description of the item
     description: string;
-    // the image of the item to display with the listing
-    img: Blob; // not sure what this will be
+    // a URL to an image of the item
+    imgUrl: string
     // an optional price for the item
     price?: number;
     // whether the item is currently spoken for / sold

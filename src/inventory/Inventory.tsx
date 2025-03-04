@@ -1,18 +1,17 @@
 import { useEffect, useState } from "react";
 import { InventoryItem } from "../domain/types/InventoryItem";
-import { TempContentSvc } from "../domain/services/TempContentSvc";
 import { Listing } from "./Listing";
-import { useAuth } from "../auth/useAuth";
+import { TempInventorySvc } from "../domain/services/TempInventorySvc";
+import { SimpleGrid } from "@mantine/core";
+
 
 export const Inventory = (): JSX.Element => {
-    const { isAdmin } = useAuth();
-    const tempContentSvc = new TempContentSvc();
+    const tempContentSvc = new TempInventorySvc();
     const [inventory, setInventory] = useState<InventoryItem[]>([]);
 
     useEffect(() => {
         // call getInventory from TempContentSvc
-        tempContentSvc.getInventory().then((data) => {
-            console.log(inventory);
+        tempContentSvc.getInventory().then((data: InventoryItem[]) => {
             setInventory(data);
         }).catch((error: Error) => {
             console.log(error);
@@ -21,7 +20,7 @@ export const Inventory = (): JSX.Element => {
     }, []);
 
     return (
-        <>
+        <SimpleGrid cols={3}>
             {
                 inventory.map((item) => {
                     return (
@@ -30,6 +29,6 @@ export const Inventory = (): JSX.Element => {
                 }
                 )
             }
-        </>
+        </SimpleGrid>
     );
 }
