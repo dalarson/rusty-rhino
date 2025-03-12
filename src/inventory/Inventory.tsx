@@ -1,36 +1,43 @@
-import { useEffect, useMemo, useState } from "react";
-import { InventoryItem } from "../domain/types/InventoryItem";
+import { useMemo } from "react";
 import { Listing } from "./Listing";
-import { TempInventorySvc } from "../domain/services/TempInventorySvc";
+import { InventorySvc } from "../domain/services/InventorySvc";
 import { SimpleGrid } from "@mantine/core";
+import { useApiRequest } from "../domain/services/ApiRequest";
+import { InventoryItem } from "../domain/types/InventoryItem";
 
 
 export const Inventory = (): JSX.Element => {
-    const tempInventorySvc = useMemo(() => {
-        return new TempInventorySvc();
+    const inventorySvc = useMemo(() => {
+        return new InventorySvc();
     }, []);
-    const [inventory, setInventory] = useState<InventoryItem[]>([]);
 
-    useEffect(() => {
-        // call getInventory from TempContentSvc
-        tempInventorySvc.getInventory().then((data: InventoryItem[]) => {
-            setInventory(data);
-        }).catch((error: Error) => {
-            console.log(error);
-            // TODO: render error message
-        })
-    }, [tempInventorySvc]);
+    const { data, isLoading } = useApiRequest(inventorySvc.getInventory());
+    const inventory = useMemo(() => {
+        if (!data) return [];
+        return data.map((item: InventoryItem) => {
+            return {
+                ...item,
+                imgUrl: "resources/img/fallback.png"
+            }
+        });
+    }, [data])
+
+
 
     return (
-        <SimpleGrid cols={3}>
-            {
-                inventory.map((item) => {
-                    return (
-                        <Listing {...item} />
+        <>
+            {isLoading && <div>Loading...</div>}
+            {!isLoading && inventory.length == 0 && <div>"No inventory!"</div>}
+            {!isLoading && inventory && <SimpleGrid cols={3}>
+                {
+                    inventory.map((item) => {
+                        return (
+                            <Listing {...item} />
+                        )
+                    }
                     )
                 }
-                )
-            }
-        </SimpleGrid>
+            </SimpleGrid>}
+        </>
     );
 }
