@@ -3,8 +3,6 @@ import { Listing } from "./Listing";
 import { InventorySvc } from "../domain/services/InventorySvc";
 import { SimpleGrid } from "@mantine/core";
 import { useApiRequest } from "../domain/services/ApiRequest";
-import { InventoryItem } from "../domain/types/InventoryItem";
-
 
 export const Inventory = (): JSX.Element => {
     const inventorySvc = useMemo(() => {
@@ -12,17 +10,11 @@ export const Inventory = (): JSX.Element => {
     }, []);
 
     const { data, isLoading } = useApiRequest(inventorySvc.getInventory());
+
     const inventory = useMemo(() => {
         if (!data) return [];
-        return data.map((item: InventoryItem) => {
-            return {
-                ...item,
-                imgUrl: "resources/img/fallback.png"
-            }
-        });
+        else return data;
     }, [data])
-
-
 
     return (
         <>
@@ -32,7 +24,7 @@ export const Inventory = (): JSX.Element => {
                 {
                     inventory.map((item) => {
                         return (
-                            <Listing {...item} />
+                            <Listing item={item} key={item.id!.toString()} />
                         )
                     }
                     )

@@ -1,22 +1,13 @@
 import { AxiosRequestConfig } from "axios";
-import { ISvcOptions } from "./ISvcOptions";
 
 export class BaseSvc {
 
     // private userContext;
-    private options?: ISvcOptions;
-    private static defaultOptions: ISvcOptions = {
-        headers: {
-            Accept: "application/json",
-        }
-    };
-
-    constructor(/* user context here */ options?: ISvcOptions) {
-        this.options = options || BaseSvc.defaultOptions;
+    constructor(/* user context here */) {
     }
 
     private initAxiosConfig = (): AxiosRequestConfig => {
-        const config: AxiosRequestConfig = this.options ?? BaseSvc.defaultOptions;
+        const config = {}
         return config;
     }
 
@@ -48,6 +39,18 @@ export class BaseSvc {
         config.method = "patch";
         config.url = url;
         config.data = data;
+        return config;
+    }
+
+    protected axiosPostConfig = <TPostData>(url: string, data: TPostData) => {
+        const config: AxiosRequestConfig = this.initAxiosConfig();
+        config.method = "post";
+        config.url = url;
+        config.data = data;
+        config.headers = {
+            "Content-Type": "multipart/form-data"
+        }
+        console.log(config);
         return config;
     }
 }
