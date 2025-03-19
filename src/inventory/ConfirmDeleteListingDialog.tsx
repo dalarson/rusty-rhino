@@ -1,10 +1,10 @@
 import { Modal, Text, Image, Center, Badge, Group, ButtonGroup, Button, LoadingOverlay } from "@mantine/core"
 import { InventoryItem } from "../domain/types/InventoryItem";
-import { formatPrice } from "./Listing";
 import { InventorySvc } from "../domain/services/InventorySvc";
 import { CacheKeys } from "../domain/services/CacheKeys";
 import { useQueryClient } from "react-query";
 import { useState } from "react";
+import { formatPrice } from "../utils/formatPrice";
 
 export interface IConfirmDeleteListingDialogProps {
     opened: boolean;

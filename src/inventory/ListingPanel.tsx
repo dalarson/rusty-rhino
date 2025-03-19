@@ -5,19 +5,11 @@ import { useForm } from "@mantine/form";
 import { InventoryItem, InventoryItemType } from "../domain/types/InventoryItem";
 import { useQueryClient } from "react-query";
 import { CacheKeys } from "../domain/services/CacheKeys";
+import { IListingPanelProps } from "./IListingPanelProps";
 
-export interface IListingPanelProps {
-    isOpen: boolean;
-    onDismiss: () => void;
-    item?: InventoryItem;
-}
-
-const cannotBeEmpty = (value: any) => { if (value.length === 0) return "Value cannot be empty." }
 
 export const ListingPanel = (props: IListingPanelProps): JSX.Element => {
     const queryClient = useQueryClient();
-
-    console.log(props.item);
 
     // File upload state variables
     const inventorySvc = new InventorySvc();
@@ -27,6 +19,7 @@ export const ListingPanel = (props: IListingPanelProps): JSX.Element => {
     // loading state for mutation
     const [isLoading, setLoading] = useState<boolean>(false);
 
+    const cannotBeEmpty = (value: string) => { if (value.length === 0) return "Value cannot be empty." }
     // FORM Metadata
     const form = useForm({
         mode: 'uncontrolled',

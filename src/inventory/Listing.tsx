@@ -5,6 +5,7 @@ import { useAuth } from "../auth/useAuth";
 import { useDisclosure } from "@mantine/hooks";
 import { ConfirmDeleteListingDialog } from "./ConfirmDeleteListingDialog";
 import { ListingPanel } from "./ListingPanel";
+import { formatPrice } from "../utils/formatPrice";
 
 export interface IListingProps {
     item: InventoryItem,
@@ -54,11 +55,4 @@ export const Listing = ({ item }: IListingProps): JSX.Element => {
             <ListingPanel item={item} isOpen={editPanelOpened} onDismiss={toggleEditPanel} ></ListingPanel>
         </>
     )
-}
-
-/**
- * A function to format the price tag for an item.
- */
-export function formatPrice(price: number) {
-    return `$${price.toFixed(2)}`;
 }
