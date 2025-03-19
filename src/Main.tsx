@@ -3,7 +3,7 @@ import { Header } from "./header/Header";
 import { Inventory } from "./inventory/Inventory";
 
 export const Main = (): JSX.Element => {
-
+    // TODO: Add affix to bottom
     return (
         <AppShell
             header={{ height: 60 }}

@@ -1,8 +1,6 @@
-import { Guid } from "./Guid";
-
 export type InventoryItem = {
     // a globally unique ID for the item.
-    guid: Guid;
+    id?: string;
     // the name or title of the item
     name: string;
     // a brief description of the item
@@ -10,7 +8,7 @@ export type InventoryItem = {
     // a URL to an image of the item
     imgUrl: string
     // an optional price for the item
-    price?: number;
+    price: number;
     // whether the item is currently spoken for / sold
     sold: boolean;
     // the type of the item, could correspond to the room in which it belongs.
