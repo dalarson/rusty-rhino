@@ -86,7 +86,7 @@ export const ListingPanel = (props: IListingPanelProps): JSX.Element => {
                 id: props.item.id,
                 sold: false
             }
-            await inventorySvc.patchInventoryItoryItem(inventoryItemDto).execute().then(() => {
+            await inventorySvc.patchInventoryItem(inventoryItemDto).execute().then(() => {
                 queryClient.invalidateQueries({ queryKey: CacheKeys.Inventory });
                 onDismiss();
             }).catch((error: Error) => {

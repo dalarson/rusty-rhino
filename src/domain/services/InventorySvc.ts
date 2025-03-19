@@ -18,7 +18,7 @@ export class InventorySvc extends BaseSvc {
         const axiosConfig: AxiosRequestConfig<string> = this.axiosPutConfig(inventoryUrl, item);
         return new ApiRequest<string>(undefined, axiosConfig);
     }
-    patchInventoryItoryItem(item: InventoryItem): ApiRequest<string> {
+    patchInventoryItem(item: InventoryItem): ApiRequest<string> {
         const axiosConfig = this.axiosPatchConfig(`${inventoryUrl}/${item.id!.toString()}`, item);
         return new ApiRequest<string>(undefined, axiosConfig);
     }

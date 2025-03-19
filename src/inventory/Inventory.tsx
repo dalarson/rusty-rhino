@@ -3,13 +3,16 @@ import { Listing } from "./Listing";
 import { InventorySvc } from "../domain/services/InventorySvc";
 import { SimpleGrid } from "@mantine/core";
 import { useApiRequest } from "../domain/services/ApiRequest";
+import { AddListing } from "./AddListing";
+import { useAuth } from "../auth/useAuth";
 
 export const Inventory = (): JSX.Element => {
+    const { isAdmin } = useAuth();
     const inventorySvc = useMemo(() => {
         return new InventorySvc();
     }, []);
 
-    const { data, isLoading } = useApiRequest(inventorySvc.getInventory());
+    const { data, isLoading, isError } = useApiRequest(inventorySvc.getInventory());
 
     const inventory = useMemo(() => {
         if (!data) return [];
@@ -19,8 +22,9 @@ export const Inventory = (): JSX.Element => {
     return (
         <>
             {isLoading && <div>Loading...</div>}
-            {!isLoading && inventory.length == 0 && <div>"No inventory!"</div>}
-            {!isLoading && inventory && <SimpleGrid cols={3}>
+            {!isLoading && !isError && inventory.length == 0 && <div>"No inventory!"</div>}
+            {!isLoading && isError && <div>Network error!</div>}
+            {!isLoading && !isError && <SimpleGrid cols={3}>
                 {
                     inventory.map((item) => {
                         return (
@@ -29,6 +33,7 @@ export const Inventory = (): JSX.Element => {
                     }
                     )
                 }
+                {isAdmin && <AddListing></AddListing>}
             </SimpleGrid>}
         </>
     );
