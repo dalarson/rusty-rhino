@@ -1,4 +1,4 @@
-import { ActionIcon, Badge, Button, Card, Group, Image, Text, useProps } from "@mantine/core";
+import { ActionIcon, Badge, Button, Card, Group, Image, Text } from "@mantine/core";
 import { InventoryItem } from "../domain/types/InventoryItem";
 import { IconPencil, IconX } from "@tabler/icons-react";
 import { useAuth } from "../auth/useAuth";

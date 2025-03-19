@@ -1,4 +1,4 @@
-import { Modal, Text, Image, Center, Badge, Group, ButtonGroupSection, ButtonGroup, Button, LoadingOverlay } from "@mantine/core"
+import { Modal, Text, Image, Center, Badge, Group, ButtonGroup, Button, LoadingOverlay } from "@mantine/core"
 import { InventoryItem } from "../domain/types/InventoryItem";
 import { formatPrice } from "./Listing";
 import { InventorySvc } from "../domain/services/InventorySvc";
