@@ -1,6 +1,6 @@
 import { useContext } from "react";
-import { AuthContext } from "./AuthContext"
+import { RustyAuthContext } from "./AuthContext"
 
 export const useAuth = () => {
-    return useContext(AuthContext);
+    return useContext(RustyAuthContext);
 }

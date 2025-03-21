@@ -10,20 +10,7 @@ import { useState } from "react";
 export const Header = (props: IHeaderProps): JSX.Element => {
     // set doc title
     document.title = props.title;
-
     const authContext = useAuth();
-
-    const [isLoginDialogOpen, setLoginDialogOpen] = useState(false);
-
-    const onSubmit = async (credentials: ICredentials) => {
-        await authContext.login(credentials).then(() => {
-            setLoginDialogOpen(false);
-        }).catch(() => {
-            // render error message
-        })
-    }
-
-
     return (
         <Group h="100%" px="md" justify="space-between">
             <Group>
@@ -32,8 +19,8 @@ export const Header = (props: IHeaderProps): JSX.Element => {
                     {props.title}
                 </div>
             </Group>
-            <UserButton onSignInClick={() => setLoginDialogOpen(true)} onSignOutClick={authContext.logout} />
-            {isLoginDialogOpen && <LoginDialog isOpen={isLoginDialogOpen} onClose={() => setLoginDialogOpen(false)} onSubmit={onSubmit} />}
+            <UserButton onSignInClick={() => authContext.login()} onSignOutClick={authContext.logout} />
+            {/* {isLoginDialogOpen && <LoginDialog isOpen={isLoginDialogOpen} onClose={() => setLoginDialogOpen(false)} onSubmit={onSubmit} />} */}
         </Group >
     )
 }

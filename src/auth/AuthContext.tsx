@@ -1,5 +1,5 @@
 import { createContext } from "react";
-import { IUserContext } from "./IUserContext";
-import { defaultUserContext } from "./DefaultUserContext";
+import { AuthContext } from "./IUserContext";
+import { defaultAuthContext } from "./DefaultUserContext";
 
-export const AuthContext = createContext<IUserContext>(defaultUserContext)
+export const RustyAuthContext = createContext<AuthContext>(defaultAuthContext)

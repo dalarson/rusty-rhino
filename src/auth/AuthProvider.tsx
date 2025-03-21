@@ -1,34 +1,65 @@
-import { useState } from "react"
-import { AuthContext } from "./AuthContext"
-import { ICredentials } from "../header/login/ICredentials";
-import { temporaryCredentials } from "../header/login/TemporaryCredentials";
+import { useCallback, useEffect, useRef } from "react"
+import { RustyAuthContext } from "./AuthContext"
+import { useIsAuthenticated, useMsal, useMsalAuthentication } from "@azure/msal-react";
+import { AuthContext } from "./IUserContext";
+import { InteractionType } from "@azure/msal-browser";
 
 export interface IAuthProviderProps {
     children: React.ReactNode;
 }
 
+
 export const AuthProvider = (props: IAuthProviderProps) => {
-    // check whether the user is authenticated
-    const [isAdmin, setIsAdmin] = useState(true);
-    const [name, setName] = useState<string | undefined>("David");
-    const login = (credentials: ICredentials) => {
-        return new Promise<void>((resolve, reject) => {
-            if (credentials.username === temporaryCredentials.username && credentials.password === temporaryCredentials.password) {
-                setTimeout(() => {
-                    setIsAdmin(true);
-                    setName(credentials.username);
-                    resolve();
-                }, 1000)
-            } else {
-                reject("Invalid credentials");
-            }
-        })
+    const { instance } = useMsal();
+    const account = instance.getActiveAccount();
+    const isAuthenticated = useIsAuthenticated();
+    const entraToken = useRef<string>("")
+
+    console.log(import.meta);
+
+    const loginRequest = {
+        scopes: [`api://${import.meta.env.VITE_CLIENT_ID}/default`],
+    }
+
+    const loginSilently = useCallback(async () => {
+        try {
+            const response = await instance.acquireTokenSilent(loginRequest)
+            entraToken.current = response.accessToken;
+        } catch (error) {
+            // just log it, we can proceed un-authenticated
+            console.log("Failed to acquire token silently")
+        }
+    }, [instance])
+
+    const getToken = useCallback(() => {
+        return entraToken.current;
+    }, [instance, entraToken])
+
+    useEffect(() => {
+        if (!isAuthenticated) {
+            // try to login silently automatically
+            loginSilently();
+        }
+    }, [instance, isAuthenticated])
+
+    const login = () => {
+        return instance.loginRedirect(loginRequest);
     }
 
     const logout = () => {
-        setIsAdmin(false);
-        setName(undefined);
+        return instance.logoutRedirect();
     }
-    return <AuthContext.Provider value={{ isAdmin, name, login, logout }} >{props.children}</AuthContext.Provider>
+
+    const authContext: AuthContext = {
+        userContext: {
+            name: account?.name
+        },
+        isAdmin: isAuthenticated,
+        getToken,
+        login,
+        logout
+    }
+
+    return <RustyAuthContext.Provider value={authContext} > {props.children}</RustyAuthContext.Provider >
 }
 

@@ -20,7 +20,7 @@ export const UserButton = (props: IUserButtonProps): JSX.Element => {
                     <UnstyledButton>
                         <Group gap={7}>
                             <Text fw={500} size="sm" lh={1} mr={3}>
-                                {authContext.name}
+                                {authContext.userContext.name}
                             </Text>
                             <IconChevronDown size={12} stroke={1.5} />
                         </Group>
