@@ -7,7 +7,11 @@ export class BaseSvc {
     }
 
     private initAxiosConfig = (): AxiosRequestConfig => {
-        const config = {}
+        const token = localStorage.getItem('rusty_auth_token');
+        const config: AxiosRequestConfig = {};
+        if (token) {
+            config.headers = { Authorization: `Bearer ${token}` };
+        }
         return config;
     }
 
@@ -48,6 +52,7 @@ export class BaseSvc {
         config.url = url;
         config.data = data;
         config.headers = {
+            ...config.headers,
             "Content-Type": "multipart/form-data"
         }
         console.log(config);

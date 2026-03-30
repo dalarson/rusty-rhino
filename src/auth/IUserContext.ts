@@ -3,7 +3,7 @@ import { ICredentials } from "../header/login/ICredentials";
 export interface IUserContext {
     isAdmin: boolean;
     name: string | undefined;
-    login: (credentials: ICredentials) => Promise<string | void>;
+    getToken: () => string;
+    login: (credentials: ICredentials) => Promise<void>;
     logout: () => void;
-    // maybe other stuff here eventually
 }

@@ -8,21 +8,15 @@ import { ICredentials } from "./login/ICredentials";
 import { useState } from "react";
 
 export const Header = (props: IHeaderProps): JSX.Element => {
-    // set doc title
     document.title = props.title;
 
     const authContext = useAuth();
-
     const [isLoginDialogOpen, setLoginDialogOpen] = useState(false);
 
-    const onSubmit = async (credentials: ICredentials) => {
-        await authContext.login(credentials).then(() => {
-            setLoginDialogOpen(false);
-        }).catch(() => {
-            // render error message
-        })
-    }
-
+    const onSubmit = async (creds: ICredentials) => {
+        await authContext.login(creds);
+        setLoginDialogOpen(false);
+    };
 
     return (
         <Group h="100%" px="md" justify="space-between">
