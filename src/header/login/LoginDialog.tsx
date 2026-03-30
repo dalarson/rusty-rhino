@@ -1,6 +1,5 @@
 import { ILoginDialogProps } from "./ILoginDialogProps"
-import { Button, Group, Loader, Modal, PasswordInput, Stack, TextInput } from '@mantine/core';
-import { temporaryCredentials } from "./TemporaryCredentials";
+import { Button, Group, Loader, Modal, PasswordInput, Stack, Text, TextInput } from '@mantine/core';
 import { useState } from "react";
 import { ICredentials } from "./ICredentials";
 
@@ -10,19 +9,20 @@ export const LoginDialog = (props: ILoginDialogProps): JSX.Element => {
     const [password, setPassword] = useState("");
 
     const [isLoading, setLoading] = useState(false);
+    const [error, setError] = useState("");
 
     const onLoginClick = () => {
-        console.log("Logging in...");
         setLoading(true);
+        setError("");
         const creds: ICredentials = {
             username,
             password
         }
         props.onSubmit(creds).then(() => {
             setLoading(false);
-        }).catch((e: Error) => {
-            console.log(e);
-            // TODO: create logging solution
+        }).catch(() => {
+            setError("Invalid username or password");
+            setLoading(false);
         });
     }
 
@@ -36,16 +36,15 @@ export const LoginDialog = (props: ILoginDialogProps): JSX.Element => {
             <Stack>
                 <TextInput
                     label="Username"
-                    placeholder={temporaryCredentials.username}
                     value={username}
                     onChange={(event) => setUsername(event.currentTarget.value)}
                 />
                 <PasswordInput
                     value={password}
                     label="Password"
-                    placeholder={temporaryCredentials.password}
                     onChange={(event) => setPassword(event.currentTarget.value)}
                 />
+                {error && <Text c="red" size="sm">{error}</Text>}
                 <Group justify="left">
                     <Button leftSection={isLoading ? <Loader type="dots" color="white" /> : undefined} title="Login" onClick={onLoginClick} >{isLoading ? "Logging in..." : "Login"}</Button>
                     <Button title="Cancel" onClick={props.onClose} variant="default">Cancel</Button>

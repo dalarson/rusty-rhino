@@ -8,10 +8,10 @@ import { ICredentials } from "./login/ICredentials";
 import { useState } from "react";
 
 export const Header = (props: IHeaderProps): JSX.Element => {
-    // set doc title
     document.title = props.title;
 
     const authContext = useAuth();
+<<<<<<< Updated upstream
 
     const [isLoginDialogOpen, setLoginDialogOpen] = useState(false);
 
@@ -23,6 +23,14 @@ export const Header = (props: IHeaderProps): JSX.Element => {
         })
     }
 
+=======
+    const [isLoginDialogOpen, setLoginDialogOpen] = useState(false);
+
+    const onSubmit = async (creds: ICredentials) => {
+        await authContext.login(creds);
+        setLoginDialogOpen(false);
+    };
+>>>>>>> Stashed changes
 
     return (
         <Group h="100%" px="md" justify="space-between">
