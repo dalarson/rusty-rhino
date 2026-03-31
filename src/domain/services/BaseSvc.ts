@@ -2,8 +2,7 @@ import { AxiosRequestConfig } from "axios";
 
 export class BaseSvc {
 
-    // private userContext;
-    constructor(/* user context here */) {
+    constructor() {
     }
 
     private initAxiosConfig = (): AxiosRequestConfig => {
@@ -46,15 +45,15 @@ export class BaseSvc {
         return config;
     }
 
-    protected axiosPostConfig = <TPostData>(url: string, data: TPostData) => {
+    protected axiosPostConfig = <TPostData>(url: string, data: TPostData, contentType?: string) => {
         const config: AxiosRequestConfig = this.initAxiosConfig();
         config.method = "post";
         config.url = url;
         config.data = data;
         config.headers = {
             ...config.headers,
-            "Content-Type": "multipart/form-data"
-        }
+            "Content-Type": contentType || "multipart/form-data",
+        };
         console.log(config);
         return config;
     }

@@ -1,3 +1,4 @@
 export const CacheKeys = {
-    Inventory: "inventory"
+    Inventory: "inventory",
+    Interest: "interest"
 }
