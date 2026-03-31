@@ -6,6 +6,7 @@ import { useDisclosure } from "@mantine/hooks";
 import { ConfirmDeleteListingDialog } from "./ConfirmDeleteListingDialog";
 import { ListingPanel } from "./ListingPanel";
 import { formatPrice } from "../utils/formatPrice";
+import { PostInquiryPanel } from "../inquiries/PostInquiryPanel";
 
 export interface IListingProps {
     item: InventoryItem,
@@ -16,6 +17,7 @@ export const Listing = ({ item }: IListingProps): JSX.Element => {
     const { isAdmin } = useAuth();
     const [deleteDialogOpened, { toggle: toggleDeleteDialog }] = useDisclosure(false);
     const [editPanelOpened, { toggle: toggleEditPanel }] = useDisclosure(false);
+    const [postInquiryOpened, { toggle: togglePostInquiry }] = useDisclosure(false);
 
     return (
         <>
@@ -47,12 +49,13 @@ export const Listing = ({ item }: IListingProps): JSX.Element => {
                     {item.description}
                 </Text>
 
-                <Button color="blue" fullWidth mt="md" radius="md">
+                <Button color="blue" fullWidth mt="md" radius="md" onClick={togglePostInquiry}>
                     I want this!
                 </Button>
             </Card>
             <ConfirmDeleteListingDialog opened={deleteDialogOpened} item={item} onClose={toggleDeleteDialog}></ConfirmDeleteListingDialog>
             <ListingPanel item={item} isOpen={editPanelOpened} onDismiss={toggleEditPanel} ></ListingPanel>
+            <PostInquiryPanel listingId={item.id!} isOpen={postInquiryOpened} onDismiss={togglePostInquiry}></PostInquiryPanel>
         </>
     )
 }

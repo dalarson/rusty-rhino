@@ -26,6 +26,7 @@ export const Header = (props: IHeaderProps): JSX.Element => {
                     {props.title}
                 </div>
             </Group>
+            {props.tabs}
             <UserButton onSignInClick={() => setLoginDialogOpen(true)} onSignOutClick={authContext.logout} />
             {isLoginDialogOpen && <LoginDialog isOpen={isLoginDialogOpen} onClose={() => setLoginDialogOpen(false)} onSubmit={onSubmit} />}
         </Group >
