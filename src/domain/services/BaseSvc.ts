@@ -1,4 +1,4 @@
-import { AxiosHeaders, AxiosRequestConfig } from "axios";
+import { AxiosRequestConfig } from "axios";
 
 export class BaseSvc {
 
