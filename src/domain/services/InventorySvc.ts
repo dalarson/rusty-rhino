@@ -32,6 +32,11 @@ export class InventorySvc extends BaseSvc {
         return new ApiRequest<InventoryItem[]>([CacheKeys.Inventory], axiosConfig);
     }
 
+    getInventoryItem(id: string): ApiRequest<InventoryItem> {
+        const axiosConfig = this.axiosGetConfig(`${inventoryUrl}/${id}`);
+        return new ApiRequest<InventoryItem>([CacheKeys.Inventory, id], axiosConfig);
+    }
+
     uploadImage(file: File): ApiRequest<string> {
         const formData: FormData = new FormData();
         formData.append("file", file);

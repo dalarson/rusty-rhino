@@ -7,6 +7,7 @@ import { ConfirmDeleteListingDialog } from "./ConfirmDeleteListingDialog";
 import { ListingPanel } from "./ListingPanel";
 import { formatPrice } from "../utils/formatPrice";
 import { PostInquiryPanel } from "../inquiries/PostInquiryPanel";
+import { useNavigate } from "react-router-dom";
 
 export interface IListingProps {
     item: InventoryItem,
@@ -15,6 +16,7 @@ export interface IListingProps {
 export const Listing = ({ item }: IListingProps): JSX.Element => {
 
     const { isAdmin } = useAuth();
+    const navigate = useNavigate();
     const [deleteDialogOpened, { toggle: toggleDeleteDialog }] = useDisclosure(false);
     const [editPanelOpened, { toggle: toggleEditPanel }] = useDisclosure(false);
     const [postInquiryOpened, { toggle: togglePostInquiry }] = useDisclosure(false);
@@ -24,11 +26,11 @@ export const Listing = ({ item }: IListingProps): JSX.Element => {
             <Card shadow={'xs'} padding={'md'} radius={'md'} withBorder >
                 <Card.Section>
                     {isAdmin &&
-                        <Group justify="left" style={{ padding: "4px" }}>
-                            <ActionIcon onClick={toggleDeleteDialog} color="red">
+                        <Group justify="left" style={{ padding: "4px", position: 'relative', zIndex: 1 }}>
+                            <ActionIcon onClick={(e) => { e.stopPropagation(); toggleDeleteDialog(); }} color="red">
                                 <IconX></IconX>
                             </ActionIcon>
-                            <ActionIcon onClick={toggleEditPanel} color="yellow">
+                            <ActionIcon onClick={(e) => { e.stopPropagation(); toggleEditPanel(); }} color="yellow">
                                 <IconPencil></IconPencil>
                             </ActionIcon>
                         </Group>}
@@ -36,8 +38,13 @@ export const Listing = ({ item }: IListingProps): JSX.Element => {
                         src={item.imgUrl}
                         fallbackSrc={"resources/images/fallback.png"}
                         width={"auto"}
-                        style={isAdmin ? { marginTop: "-36px" } : undefined}
+                        style={{ 
+                            marginTop: isAdmin ? "-36px" : "0", 
+                            cursor: 'pointer',
+                            display: 'block'
+                        }}
                         fit={"contain"}
+                        onClick={() => navigate(`/listing/${item.id}`)}
                     />
                 </Card.Section>
                 <Group justify="space-between" mt="md" mb="xs">

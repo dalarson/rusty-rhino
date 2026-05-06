@@ -14,6 +14,8 @@ export const ListingPanel = (props: IListingPanelProps): JSX.Element => {
     // File upload state variables
     const inventorySvc = new InventorySvc();
     const [file, setFile] = useState<File | null>(null);
+    const [beforeFiles, setBeforeFiles] = useState<File[]>([]);
+    const [afterFiles, setAfterFiles] = useState<File[]>([]);
     const [error, setError] = useState<Error | null>(null);
 
     // loading state for mutation
@@ -43,52 +45,66 @@ export const ListingPanel = (props: IListingPanelProps): JSX.Element => {
     })
 
     const onSubmit = async (values: typeof form.values) => {
-        // if props.item is undefined we are adding an item
-        if (props.item == undefined) {
-            // upload image, await response
-            setLoading(true);
-            if (!file) throw new Error("no file available");
-            return await inventorySvc.uploadImage(file).execute().then(async (imgUrl: string) => {
+        setLoading(true);
+        try {
+            // if props.item is undefined we are adding an item
+            if (props.item == undefined) {
+                if (!file) throw new Error("Main image is required");
+
+                // Prepare all upload tasks
+                const uploadTasks = [inventorySvc.uploadImage(file).execute()];
+                beforeFiles.forEach(f => uploadTasks.push(inventorySvc.uploadImage(f).execute()));
+                afterFiles.forEach(f => uploadTasks.push(inventorySvc.uploadImage(f).execute()));
+
+                const urls = await Promise.all(uploadTasks);
+                const mainImgUrl = urls[0];
+                const beforeImgUrls = urls.slice(1, 1 + beforeFiles.length);
+                const afterImgUrls = urls.slice(1 + beforeFiles.length);
+
                 const inventoryDto: InventoryItem = {
                     ...values,
-                    imgUrl: imgUrl,
+                    imgUrl: mainImgUrl,
+                    beforeImgUrls,
+                    afterImgUrls,
                     sold: false
                 }
-                await inventorySvc.addInventoryItem(inventoryDto).execute().then(() => {
-                    // clear react query
-                    queryClient.invalidateQueries({ queryKey: CacheKeys.Inventory });
-                    onDismiss();
-                }).catch((e: Error) => {
-                    console.log("Failed to create inventory item");
-                    setLoading(false);
-                    throw e;
-                })
-            }).catch((e: Error) => {
-                console.log("Failed to upload file");
-                setError(e);
-                setLoading(false);
-            })
-        } else {
-            // if an item was passed in we are editing the item
-            // TODO: if a new image was uploaded, delete old image and upload new image
-            // for now images will not be editable
-            setLoading(true);
-            const inventoryItemDto: InventoryItem = {
-                ...values,
-                imgUrl: props.item.imgUrl,
-                id: props.item.id,
-                sold: false
-            }
-            await inventorySvc.patchInventoryItem(inventoryItemDto).execute().then(() => {
-                queryClient.invalidateQueries({ queryKey: CacheKeys.Inventory });
-                onDismiss();
-            }).catch((error: Error) => {
-                setError(error);
-                setLoading(false);
-            })
-            // patch inventory item with new img url and other data
-        }
+                await inventorySvc.addInventoryItem(inventoryDto).execute();
+            } else {
+                // if an item was passed in we are editing the item
+                let beforeImgUrls = props.item.beforeImgUrls ?? [];
+                let afterImgUrls = props.item.afterImgUrls ?? [];
 
+                if (beforeFiles.length > 0 || afterFiles.length > 0) {
+                    const uploadTasks: Promise<string>[] = [];
+                    beforeFiles.forEach(f => uploadTasks.push(inventorySvc.uploadImage(f).execute()));
+                    afterFiles.forEach(f => uploadTasks.push(inventorySvc.uploadImage(f).execute()));
+                    
+                    const urls = await Promise.all(uploadTasks);
+                    const newBeforeUrls = urls.slice(0, beforeFiles.length);
+                    const newAfterUrls = urls.slice(beforeFiles.length);
+                    
+                    beforeImgUrls = [...beforeImgUrls, ...newBeforeUrls].slice(0, 3);
+                    afterImgUrls = [...afterImgUrls, ...newAfterUrls].slice(0, 3);
+                }
+
+                const inventoryItemDto: InventoryItem = {
+                    ...values,
+                    imgUrl: props.item.imgUrl,
+                    id: props.item.id,
+                    beforeImgUrls,
+                    afterImgUrls,
+                    sold: false
+                }
+                await inventorySvc.patchInventoryItem(inventoryItemDto).execute();
+            }
+
+            queryClient.invalidateQueries({ queryKey: CacheKeys.Inventory });
+            onDismiss();
+        } catch (e: any) {
+            console.error("Operation failed", e);
+            setError(e);
+            setLoading(false);
+        }
     }
 
     const onDismiss = () => {
@@ -96,6 +112,8 @@ export const ListingPanel = (props: IListingPanelProps): JSX.Element => {
         // clear state for next open of drawer
         setError(null);
         setFile(null);
+        setBeforeFiles([]);
+        setAfterFiles([]);
         form.reset();
     }
 
@@ -103,18 +121,37 @@ export const ListingPanel = (props: IListingPanelProps): JSX.Element => {
         <Drawer position="right" opened={props.isOpen} onClose={onDismiss} title={props.item === undefined ? "Add a new listing" : "Edit a listing"}>
             <form onSubmit={form.onSubmit(onSubmit)}>
                 <Stack gap={"8px"}>
-                    {props.item == undefined && <FileInput
-                        key={form.key('file')}
-                        label="Select an image"
-                        description="Make sure it's less than 2 MB, and .png or .jpg"
-                        placeholder="click here to upload..."
-                        onChange={setFile}
-                        disabled={props.item !== undefined}
-                    />}
+                    {props.item == undefined && (
+                        <FileInput
+                            key={form.key('file')}
+                            label="Select main image"
+                            description="Make sure it's less than 2 MB, and .png or .jpg"
+                            placeholder="click here to upload..."
+                            onChange={setFile}
+                            required
+                        />
+                    )}
+                    
+                    <FileInput
+                        label="Before photos (max 3)"
+                        placeholder="Upload before photos..."
+                        multiple
+                        value={beforeFiles}
+                        onChange={(files) => setBeforeFiles(files.slice(0, 3))}
+                    />
+
+                    <FileInput
+                        label="After photos (max 3)"
+                        placeholder="Upload after photos..."
+                        multiple
+                        value={afterFiles}
+                        onChange={(files) => setAfterFiles(files.slice(0, 3))}
+                    />
+
                     {props.item && props.item.imgUrl && (
                         <>
-                            <Text>Images are not editable yet, please delete and re-add to edit image.</Text>
-                            <Image src={props.item.imgUrl} />
+                            <Text size="xs">Main image (not editable yet):</Text>
+                            <Image src={props.item.imgUrl} mah={100} w="auto" />
                         </>
                     )}
                     {error && <Text c="red">{error.message}</Text>}
