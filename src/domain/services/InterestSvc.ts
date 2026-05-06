@@ -19,4 +19,9 @@ export class InterestSvc extends BaseSvc {
         const axiosConfig = this.axiosPostConfig(interestUrl, inquiry, "application/json");
         return new ApiRequest<void>([CacheKeys.Interest], axiosConfig);
     }
+
+    deleteInterest(id: string): ApiRequest<void> {
+        const axiosConfig = this.axiosDeleteConfig(`${interestUrl}/${id}`);
+        return new ApiRequest<void>([CacheKeys.Interest], axiosConfig);
+    }
 }

@@ -13,6 +13,10 @@ export type InventoryItem = {
     sold: boolean;
     // the type of the item, could correspond to the room in which it belongs.
     type: InventoryItemType;
+    // URLs for "before" photos
+    beforeImgUrls?: string[];
+    // URLs for "after" photos
+    afterImgUrls?: string[];
 }
 
 export enum InventoryItemType {
