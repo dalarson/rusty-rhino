@@ -100,9 +100,10 @@ export const ListingPanel = (props: IListingPanelProps): JSX.Element => {
 
             queryClient.invalidateQueries({ queryKey: CacheKeys.Inventory });
             onDismiss();
-        } catch (e: any) {
-            console.error("Operation failed", e);
-            setError(e);
+        } catch (e: unknown) {
+            const error = e instanceof Error ? e : new Error(String(e));
+            console.error("Operation failed", error);
+            setError(error);
             setLoading(false);
         }
     }

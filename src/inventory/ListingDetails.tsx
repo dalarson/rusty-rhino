@@ -7,6 +7,7 @@ import { InventorySvc } from "../domain/services/InventorySvc";
 import { useApiRequest } from "../domain/services/ApiRequest";
 import { formatPrice } from "../utils/formatPrice";
 import { PostInquiryPanel } from "../inquiries/PostInquiryPanel";
+import { InventoryItem } from "../domain/types/InventoryItem";
 
 export const ListingDetails = (): JSX.Element => {
     const { id } = useParams<{ id: string }>();
@@ -63,7 +64,7 @@ export const ListingDetails = (): JSX.Element => {
     );
 };
 
-const CardSection = ({ item }: { item: any }) => (
+const CardSection = ({ item }: { item: InventoryItem }) => (
     <Stack gap="md">
         <Center>
             <Image 
