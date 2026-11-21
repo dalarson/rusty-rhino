@@ -2,6 +2,7 @@ package com.rusty_rhino.rusty_api.controllers;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,7 +31,7 @@ public class InterestController {
     @GetMapping
     public List<InterestEntry> getAllInterest() {
         try {
-            return repo.findAll().collectList().block();
+            return repo.findAll();
         } catch (Exception e) {
             log.warn("Failed to read interest entries: {}", e.getMessage());
             return Collections.emptyList();
@@ -38,9 +39,9 @@ public class InterestController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteInterest(@PathVariable String id) {
+    public ResponseEntity<Void> deleteInterest(@PathVariable UUID id) {
         try {
-            repo.deleteById(id, new com.azure.cosmos.models.PartitionKey("interest")).block();
+            repo.deleteById(id);
             log.info("Interest entry {} deleted", id);
             return ResponseEntity.ok().build();
         } catch (Exception e) {
@@ -62,12 +63,12 @@ public class InterestController {
         }
 
         entry.setCreatedAt(System.currentTimeMillis());
-        entry.setPk("interest");
+        entry.setId(null);
 
         try {
-            InterestEntry saved = repo.save(entry).block();
+            InterestEntry saved = repo.save(entry);
             log.info("Interest submitted by {} for item {}", saved.getEmail(), saved.getInventoryItemId());
-            return ResponseEntity.status(HttpStatus.CREATED).body(saved.getId());
+            return ResponseEntity.status(HttpStatus.CREATED).body(saved.getId().toString());
         } catch (Exception e) {
             log.error("Failed to save interest entry", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to save");

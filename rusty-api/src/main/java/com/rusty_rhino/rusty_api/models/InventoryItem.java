@@ -1,36 +1,34 @@
 package com.rusty_rhino.rusty_api.models;
 
 import java.util.List;
+import java.util.UUID;
 
-import org.springframework.data.annotation.Id;
-import com.azure.spring.data.cosmos.core.mapping.Container;
-import com.azure.spring.data.cosmos.core.mapping.GeneratedValue;
-import com.azure.spring.data.cosmos.core.mapping.PartitionKey;
-import io.micrometer.common.lang.NonNull;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
 
-@Container(containerName = "inventory", autoCreateContainer = false)
+@Entity
+@Table(name = "inventory")
 @Data
-@RequiredArgsConstructor
 public class InventoryItem {
 
-    @NonNull
-    private String name;
-    @NonNull
-    private String description;
     @Id
-    @GeneratedValue
-    private String id;
-    @NonNull
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
+    private String name;
+    private String description;
     private double price;
     private String imgUrl;
+    @JdbcTypeCode(SqlTypes.ARRAY)
     private List<String> beforeImgUrls;
+    @JdbcTypeCode(SqlTypes.ARRAY)
     private List<String> afterImgUrls;
     private boolean sold;
-    @NonNull
     private String type;
-    @PartitionKey
-    private String pk = "inventory";
-
 }

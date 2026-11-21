@@ -1,51 +1,56 @@
 package com.rusty_rhino.rusty_api.controllers;
 
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
-
-import com.azure.storage.blob.BlobClient;
-import com.azure.storage.blob.BlobContainerClient;
-import com.azure.storage.blob.BlobServiceClient;
-
-import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestClient;
+import org.springframework.web.multipart.MultipartFile;
+
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestController
-@AllArgsConstructor
 public class InventoryImageController {
-    private final BlobServiceClient blobServiceClient;
-    private final String containerName = "img";
+    private static final String BUCKET = "img";
+
+    private final String supabaseUrl;
+    private final String serviceKey;
+    private final RestClient client = RestClient.create();
+
+    public InventoryImageController(
+            @Value("${supabase.url:}") String supabaseUrl,
+            @Value("${supabase.service-key:}") String serviceKey) {
+        this.supabaseUrl = supabaseUrl.replaceAll("/+$", "");
+        this.serviceKey = serviceKey;
+    }
 
     @PostMapping("/img")
     public ResponseEntity<String> uploadImage(@RequestParam MultipartFile file) {
         log.info("Image upload request received: filename={}, size={} bytes, contentType={}",
                 file.getOriginalFilename(), file.getSize(), file.getContentType());
-        try (InputStream inputStream = file.getInputStream()) {
-            BlobContainerClient containerClient = blobServiceClient.getBlobContainerClient(this.containerName);
-            if (!containerClient.exists()) {
-                log.info("Blob container '{}' does not exist, creating it", containerName);
-                containerClient.create();
-            }
-
+        try {
             String filename = file.getOriginalFilename();
-            String newImgName = UUID.randomUUID().toString() + filename.substring(filename.lastIndexOf("."));
-            log.info("Uploading blob: {}", newImgName);
+            String newImgName = UUID.randomUUID() + filename.substring(filename.lastIndexOf("."));
+            String contentType = file.getContentType() != null ? file.getContentType()
+                    : MediaType.APPLICATION_OCTET_STREAM_VALUE;
 
-            BlobClient blobClient = containerClient.getBlobClient(newImgName);
-            blobClient.upload(inputStream, file.getSize(), true);
+            client.post()
+                    .uri(supabaseUrl + "/storage/v1/object/" + BUCKET + "/" + newImgName)
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + serviceKey)
+                    .contentType(MediaType.parseMediaType(contentType))
+                    .body(file.getBytes())
+                    .retrieve()
+                    .toBodilessEntity();
 
-            String blobUrl = blobClient.getBlobUrl();
-            log.info("Upload successful: {}", blobUrl);
-            return ResponseEntity.ok(blobUrl);
+            String url = supabaseUrl + "/storage/v1/object/public/" + BUCKET + "/" + newImgName;
+            log.info("Upload successful: {}", url);
+            return ResponseEntity.ok(url);
         } catch (Exception e) {
             log.error("Image upload failed: {}", e.getMessage(), e);
             return ResponseEntity.internalServerError().body("Upload failed: " + e.getMessage());

@@ -1,20 +1,22 @@
 package com.rusty_rhino.rusty_api.models;
 
-import org.springframework.data.annotation.Id;
+import java.util.UUID;
 
-import com.azure.spring.data.cosmos.core.mapping.Container;
-import com.azure.spring.data.cosmos.core.mapping.GeneratedValue;
-import com.azure.spring.data.cosmos.core.mapping.PartitionKey;
-
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.Data;
 
-@Container(containerName = "interest", autoCreateContainer = false)
+@Entity
+@Table(name = "interest")
 @Data
 public class InterestEntry {
 
     @Id
-    @GeneratedValue
-    private String id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     private String name;
 
@@ -27,7 +29,4 @@ public class InterestEntry {
     private String inventoryItemId;
 
     private long createdAt;
-
-    @PartitionKey
-    private String pk = "interest";
 }

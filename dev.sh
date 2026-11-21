@@ -3,15 +3,13 @@
 # Usage: ./dev.sh
 #
 # Required env vars for the backend (set these in rusty-api/.env.local):
-#   SPRING_CLOUD_AZURE_COSMOS_ENDPOINT
-#   SPRING_CLOUD_AZURE_COSMOS_DATABASE
-#   AZURE_STORAGE_BLOB_ENDPOINT
+#   DB_URL            jdbc:postgresql://<host>:<port>/postgres (Supabase pooler or local)
+#   DB_USER, DB_PASSWORD
+#   SUPABASE_URL, SUPABASE_SERVICE_KEY   (image uploads)
 #
 # Optional (have defaults):
 #   ADMIN_USER_1, ADMIN_PASS_1, ADMIN_USER_2, ADMIN_PASS_2
 #   JWT_SECRET, CORS_ALLOWED_ORIGINS
-#
-# Requires: az login (for DefaultAzureCredential)
 
 set -e
 
@@ -28,7 +26,7 @@ fi
 
 # Check required env vars
 MISSING=""
-for var in SPRING_CLOUD_AZURE_COSMOS_ENDPOINT SPRING_CLOUD_AZURE_COSMOS_DATABASE AZURE_STORAGE_BLOB_ENDPOINT; do
+for var in DB_URL DB_USER DB_PASSWORD SUPABASE_URL SUPABASE_SERVICE_KEY; do
     if [ -z "${!var}" ]; then
         MISSING="$MISSING  $var\n"
     fi

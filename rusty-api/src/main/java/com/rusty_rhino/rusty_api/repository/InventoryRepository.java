@@ -1,7 +1,10 @@
 package com.rusty_rhino.rusty_api.repository;
 
-import com.azure.spring.data.cosmos.repository.ReactiveCosmosRepository;
+import java.util.UUID;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
 import com.rusty_rhino.rusty_api.models.InventoryItem;
 
-public interface InventoryRepository extends ReactiveCosmosRepository<InventoryItem, String> {
+public interface InventoryRepository extends JpaRepository<InventoryItem, UUID> {
 }
