@@ -13,11 +13,10 @@ fi
 USERNAME="$1"
 PASSWORD="$2"
 
-# Get existing app settings to find the next available slot
-EXISTING=$(az webapp config appsettings list \
+EXISTING=$(az containerapp show \
   --name "$APP_NAME" \
   --resource-group "$RESOURCE_GROUP" \
-  --query "[?starts_with(name, 'ADMIN_USER_')].name" \
+  --query "properties.template.containers[0].env[?starts_with(name, 'ADMIN_USER_')].name" \
   -o tsv)
 
 NEXT_INDEX=1
@@ -30,12 +29,10 @@ done
 
 echo "Adding user '$USERNAME' as ADMIN_USER_${NEXT_INDEX}..."
 
-az webapp config appsettings set \
-  --name "$APP_NAME" \
-  --resource-group "$RESOURCE_GROUP" \
-  --settings \
-    "ADMIN_USER_${NEXT_INDEX}=${USERNAME}" \
-    "ADMIN_PASS_${NEXT_INDEX}=${PASSWORD}" \
+az containerapp secret set --name "$APP_NAME" --resource-group "$RESOURCE_GROUP" \
+  --secrets "admin-pass-${NEXT_INDEX}=${PASSWORD}" --output none
+az containerapp update --name "$APP_NAME" --resource-group "$RESOURCE_GROUP" \
+  --set-env-vars "ADMIN_USER_${NEXT_INDEX}=${USERNAME}" "ADMIN_PASS_${NEXT_INDEX}=secretref:admin-pass-${NEXT_INDEX}" \
   --output none
 
 # Add property entries if they don't already exist
