@@ -3,15 +3,35 @@
 # frontend on Static Web Apps Free). Database and image storage live in Supabase.
 # Run once, then configure GitHub secrets/variables as printed at the end.
 #
-# Prerequisites: az login
-# Required env vars: GITHUB_REPO (owner/name), SUPABASE_DB_URL, SUPABASE_DB_USER,
-#   SUPABASE_DB_PASSWORD, SUPABASE_URL, SUPABASE_SERVICE_KEY, JWT_SECRET,
-#   ADMIN_USER_1, ADMIN_PASS_1
+# Prerequisites: az login, and rusty-api/.env.local filled in (DB_URL, DB_USER,
+# DB_PASSWORD, SUPABASE_URL, SUPABASE_SERVICE_KEY, ADMIN_USER_1, ADMIN_PASS_1).
+# Optional env: GITHUB_REPO (owner/name; defaults to the git origin), JWT_SECRET
+# (generated if unset; printed at the end).
 
 set -euo pipefail
 
+ENV_FILE="$(dirname "$0")/../.env.local"
+if [ -f "$ENV_FILE" ]; then
+  set -a; source "$ENV_FILE"; set +a
+fi
+
+for v in DB_URL DB_USER DB_PASSWORD SUPABASE_URL SUPABASE_SERVICE_KEY ADMIN_USER_1 ADMIN_PASS_1; do
+  if [ -z "${!v:-}" ]; then echo "ERROR: $v is not set (add it to rusty-api/.env.local)"; exit 1; fi
+done
+
+SUPABASE_DB_URL="$DB_URL"
+SUPABASE_DB_USER="$DB_USER"
+SUPABASE_DB_PASSWORD="$DB_PASSWORD"
+if [ -z "${JWT_SECRET:-}" ]; then
+  JWT_SECRET=$(openssl rand -base64 48)
+  GENERATED_JWT=1
+fi
+if [ -z "${GITHUB_REPO:-}" ]; then
+  GITHUB_REPO=$(git -C "$(dirname "$0")" remote get-url origin | sed -E 's#.*github.com[:/]##; s#\.git$##')
+fi
+echo "GitHub repo: $GITHUB_REPO"
+
 RESOURCE_GROUP="rusty-rhino-rg"
-LOCATION="centralus"
 ENV_NAME="rusty-env"
 APP_NAME="rusty-api"
 STATIC_WEB_APP_NAME="rusty-rhino"
@@ -20,9 +40,15 @@ TENANT_ID=$(az account show --query tenantId -o tsv)
 
 az extension add --name containerapp --upgrade --only-show-errors
 az provider register --namespace Microsoft.App --wait
-az provider register --namespace Microsoft.OperationalInsights --wait
 
-az group create --name "$RESOURCE_GROUP" --location "$LOCATION" -o none
+# Reuse the existing resource group's location if it exists; otherwise create it.
+if az group exists --name "$RESOURCE_GROUP" | grep -q true; then
+  LOCATION=$(az group show --name "$RESOURCE_GROUP" --query location -o tsv)
+else
+  LOCATION="${LOCATION:-eastus}"
+  az group create --name "$RESOURCE_GROUP" --location "$LOCATION" -o none
+fi
+echo "Using location: $LOCATION"
 
 echo "Creating Static Web App (Free)..."
 az staticwebapp create --name "$STATIC_WEB_APP_NAME" --resource-group "$RESOURCE_GROUP" \
@@ -34,7 +60,7 @@ SWA_URL=$(az staticwebapp show --name "$STATIC_WEB_APP_NAME" \
 
 echo "Creating Container Apps environment..."
 az containerapp env create --name "$ENV_NAME" --resource-group "$RESOURCE_GROUP" \
-  --location "$LOCATION" -o none
+  --location "$LOCATION" --logs-destination none -o none
 
 # Placeholder image; the GitHub workflow deploys the real one from GHCR.
 echo "Creating Container App (scale to zero)..."
@@ -55,8 +81,11 @@ API_FQDN=$(az containerapp show --name "$APP_NAME" --resource-group "$RESOURCE_G
   --query properties.configuration.ingress.fqdn -o tsv)
 
 echo "Creating Entra ID app registration for GitHub Actions (OIDC)..."
-APP_REG=$(az ad app create --display-name "rusty-github-deploy" --query appId -o tsv)
-az ad sp create --id "$APP_REG" -o none
+APP_REG=$(az ad app list --display-name "rusty-github-deploy" --query "[0].appId" -o tsv)
+if [ -z "$APP_REG" ]; then
+  APP_REG=$(az ad app create --display-name "rusty-github-deploy" --query appId -o tsv)
+  az ad sp create --id "$APP_REG" -o none
+fi
 az role assignment create --assignee "$APP_REG" --role "Contributor" \
   --scope "/subscriptions/$SUBSCRIPTION_ID/resourceGroups/$RESOURCE_GROUP" -o none
 az ad app federated-credential create --id "$APP_REG" --parameters "{
