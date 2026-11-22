@@ -60,9 +60,9 @@ jobs:
       - uses: actions/checkout@v4
       - uses: supabase/setup-cli@v1
         with:
-          version: latest
+          version: 2.113.0
       - run: supabase link --project-ref "${{ vars.SUPABASE_PROJECT_REF }}"
-      - run: supabase db push
+      - run: supabase db push --linked
 
   deploy-api:
     if: github.event_name == 'push'
