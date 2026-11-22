@@ -1,0 +1,118 @@
+#!/usr/bin/env bash
+# Creates the Azure resources for Rusty Rhino (backend on Container Apps, scale-to-zero;
+# frontend on Static Web Apps Free). Database and image storage live in Supabase.
+# Run once, then configure GitHub secrets/variables as printed at the end.
+#
+# Prerequisites: az login, and rusty-api/.env.local filled in (DB_URL, DB_USER,
+# DB_PASSWORD, SUPABASE_URL, SUPABASE_SERVICE_KEY, ADMIN_USER_1, ADMIN_PASS_1).
+# Optional env: GITHUB_REPO (owner/name; defaults to the git origin), JWT_SECRET
+# (generated if unset; printed at the end).
+
+set -euo pipefail
+
+ENV_FILE="$(dirname "$0")/../.env.local"
+if [ -f "$ENV_FILE" ]; then
+  set -a; source "$ENV_FILE"; set +a
+fi
+
+for v in DB_URL DB_USER DB_PASSWORD SUPABASE_URL SUPABASE_SERVICE_KEY ADMIN_USER_1 ADMIN_PASS_1; do
+  if [ -z "${!v:-}" ]; then echo "ERROR: $v is not set (add it to rusty-api/.env.local)"; exit 1; fi
+done
+
+SUPABASE_DB_URL="$DB_URL"
+SUPABASE_DB_USER="$DB_USER"
+SUPABASE_DB_PASSWORD="$DB_PASSWORD"
+if [ -z "${JWT_SECRET:-}" ]; then
+  JWT_SECRET=$(openssl rand -base64 48)
+  GENERATED_JWT=1
+fi
+if [ -z "${GITHUB_REPO:-}" ]; then
+  GITHUB_REPO=$(git -C "$(dirname "$0")" remote get-url origin | sed -E 's#.*github.com[:/]##; s#\.git$##')
+fi
+echo "GitHub repo: $GITHUB_REPO"
+
+RESOURCE_GROUP="rusty-rhino-rg"
+ENV_NAME="rusty-env"
+APP_NAME="rusty-api"
+STATIC_WEB_APP_NAME="rusty-rhino"
+SUBSCRIPTION_ID=$(az account show --query id -o tsv)
+TENANT_ID=$(az account show --query tenantId -o tsv)
+
+az extension add --name containerapp --upgrade --only-show-errors
+az provider register --namespace Microsoft.App --wait
+
+# Reuse the existing resource group's location if it exists; otherwise create it.
+if az group exists --name "$RESOURCE_GROUP" | grep -q true; then
+  LOCATION=$(az group show --name "$RESOURCE_GROUP" --query location -o tsv)
+else
+  LOCATION="${LOCATION:-eastus}"
+  az group create --name "$RESOURCE_GROUP" --location "$LOCATION" -o none
+fi
+echo "Using location: $LOCATION"
+
+echo "Creating Static Web App (Free)..."
+az staticwebapp create --name "$STATIC_WEB_APP_NAME" --resource-group "$RESOURCE_GROUP" \
+  --location "$LOCATION" --sku Free -o none
+SWA_TOKEN=$(az staticwebapp secrets list --name "$STATIC_WEB_APP_NAME" \
+  --resource-group "$RESOURCE_GROUP" --query properties.apiKey -o tsv)
+SWA_URL=$(az staticwebapp show --name "$STATIC_WEB_APP_NAME" \
+  --resource-group "$RESOURCE_GROUP" --query defaultHostname -o tsv)
+
+echo "Creating Container Apps environment..."
+az containerapp env create --name "$ENV_NAME" --resource-group "$RESOURCE_GROUP" \
+  --location "$LOCATION" --logs-destination none -o none
+
+# Placeholder image; the GitHub workflow deploys the real one from GHCR.
+echo "Creating Container App (scale to zero)..."
+az containerapp create --name "$APP_NAME" --resource-group "$RESOURCE_GROUP" \
+  --environment "$ENV_NAME" \
+  --image mcr.microsoft.com/k8se/quickstart:latest \
+  --target-port 8080 --ingress external \
+  --cpu 0.5 --memory 1.0Gi --min-replicas 0 --max-replicas 1 \
+  --secrets "db-password=$SUPABASE_DB_PASSWORD" "supabase-key=$SUPABASE_SERVICE_KEY" \
+            "jwt-secret=$JWT_SECRET" "admin-pass-1=$ADMIN_PASS_1" \
+  --env-vars "DB_URL=$SUPABASE_DB_URL" "DB_USER=$SUPABASE_DB_USER" \
+             "DB_PASSWORD=secretref:db-password" \
+             "SUPABASE_URL=$SUPABASE_URL" "SUPABASE_SERVICE_KEY=secretref:supabase-key" \
+             "JWT_SECRET=secretref:jwt-secret" \
+             "ADMIN_USER_1=$ADMIN_USER_1" "ADMIN_PASS_1=secretref:admin-pass-1" \
+             "CORS_ALLOWED_ORIGINS=https://$SWA_URL" -o none
+API_FQDN=$(az containerapp show --name "$APP_NAME" --resource-group "$RESOURCE_GROUP" \
+  --query properties.configuration.ingress.fqdn -o tsv)
+
+echo "Creating Entra ID app registration for GitHub Actions (OIDC)..."
+APP_REG=$(az ad app list --display-name "rusty-github-deploy" --query "[0].appId" -o tsv)
+if [ -z "$APP_REG" ]; then
+  APP_REG=$(az ad app create --display-name "rusty-github-deploy" --query appId -o tsv)
+  az ad sp create --id "$APP_REG" -o none
+fi
+az role assignment create --assignee "$APP_REG" --role "Contributor" \
+  --scope "/subscriptions/$SUBSCRIPTION_ID/resourceGroups/$RESOURCE_GROUP" -o none
+az ad app federated-credential create --id "$APP_REG" --parameters "{
+  \"name\": \"rusty-main\",
+  \"issuer\": \"https://token.actions.githubusercontent.com\",
+  \"subject\": \"repo:${GITHUB_REPO}:ref:refs/heads/main\",
+  \"audiences\": [\"api://AzureADTokenExchange\"]
+}"
+
+cat <<EOF
+
+=============================================
+ Infrastructure setup complete
+=============================================
+API URL:    https://$API_FQDN
+Client URL: https://$SWA_URL
+
+GitHub secrets ($GITHUB_REPO):
+  AZURE_CLIENT_ID=$APP_REG
+  AZURE_TENANT_ID=$TENANT_ID
+  AZURE_SUBSCRIPTION_ID=$SUBSCRIPTION_ID
+  AZURE_STATIC_WEB_APPS_API_TOKEN=$SWA_TOKEN
+  SUPABASE_ACCESS_TOKEN, SUPABASE_DB_PASSWORD   (from Supabase dashboard)
+GitHub variables:
+  SUPABASE_PROJECT_REF
+  VITE_RUSTY_API_BASE_URL=https://$API_FQDN
+  AZURE_RESOURCE_GROUP=$RESOURCE_GROUP
+Also: make the GHCR package public after the first push (or add registry credentials).
+=============================================
+EOF
