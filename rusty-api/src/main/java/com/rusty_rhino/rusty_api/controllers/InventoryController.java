@@ -3,6 +3,7 @@ package com.rusty_rhino.rusty_api.controllers;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.rusty_rhino.rusty_api.models.InventoryItem;
 import com.rusty_rhino.rusty_api.repository.InventoryRepository;
@@ -39,9 +41,8 @@ public class InventoryController {
             item.setId(null);
             return repo.save(item).getId().toString();
         } catch (Exception e) {
-            String msg = e.getMessage();
-            log.error(msg, e);
-            return msg;
+            log.error(e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to save inventory item", e);
         }
     }
 
@@ -50,7 +51,7 @@ public class InventoryController {
         try {
             InventoryItem existing = repo.findById(id).orElse(null);
             if (existing == null) {
-                return "Not found";
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Not found");
             }
             existing.setName(item.getName());
             existing.setDescription(item.getDescription());
@@ -59,10 +60,11 @@ public class InventoryController {
             existing.setType(item.getType());
             existing.setImgUrls(item.getImgUrls());
             return repo.save(existing).getId().toString();
+        } catch (ResponseStatusException e) {
+            throw e;
         } catch (Exception e) {
-            String msg = e.getMessage();
-            log.error(msg, e);
-            return msg;
+            log.error(e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to save inventory item", e);
         }
     }
 

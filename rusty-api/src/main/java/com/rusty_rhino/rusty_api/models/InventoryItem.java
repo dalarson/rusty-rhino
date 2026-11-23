@@ -29,9 +29,9 @@ public class InventoryItem {
     // legacy fields, superseded by imgUrls
     private String imgUrl;
     @JdbcTypeCode(SqlTypes.ARRAY)
-    private List<String> beforeImgUrls;
+    private List<String> beforeImgUrls = new java.util.ArrayList<>();
     @JdbcTypeCode(SqlTypes.ARRAY)
-    private List<String> afterImgUrls;
+    private List<String> afterImgUrls = new java.util.ArrayList<>();
     private boolean sold;
     private String type;
 }
