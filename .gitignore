@@ -25,3 +25,4 @@ dist-ssr
 
 # development config file
 *.development
+!.env.development

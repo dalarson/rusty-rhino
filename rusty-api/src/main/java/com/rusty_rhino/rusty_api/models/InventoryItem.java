@@ -24,11 +24,14 @@ public class InventoryItem {
     private String name;
     private String description;
     private double price;
+    @JdbcTypeCode(SqlTypes.ARRAY)
+    private List<String> imgUrls = new java.util.ArrayList<>();
+    // legacy fields, superseded by imgUrls
     private String imgUrl;
     @JdbcTypeCode(SqlTypes.ARRAY)
-    private List<String> beforeImgUrls;
+    private List<String> beforeImgUrls = new java.util.ArrayList<>();
     @JdbcTypeCode(SqlTypes.ARRAY)
-    private List<String> afterImgUrls;
+    private List<String> afterImgUrls = new java.util.ArrayList<>();
     private boolean sold;
     private String type;
 }

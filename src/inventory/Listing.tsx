@@ -7,6 +7,7 @@ import { ConfirmDeleteListingDialog } from "./ConfirmDeleteListingDialog";
 import { ListingPanel } from "./ListingPanel";
 import { formatPrice } from "../utils/formatPrice";
 import { PostInquiryPanel } from "../inquiries/PostInquiryPanel";
+import { getPhotos } from "../utils/photos";
 import { useNavigate } from "react-router-dom";
 
 export interface IListingProps {
@@ -35,7 +36,7 @@ export const Listing = ({ item }: IListingProps): JSX.Element => {
                             </ActionIcon>
                         </Group>}
                     <Image
-                        src={item.imgUrl}
+                        src={getPhotos(item)[0]}
                         fallbackSrc={"resources/images/fallback.png"}
                         width={"auto"}
                         style={{ 

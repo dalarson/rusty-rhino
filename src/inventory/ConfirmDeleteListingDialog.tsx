@@ -4,6 +4,7 @@ import { InventorySvc } from "../domain/services/InventorySvc";
 import { CacheKeys } from "../domain/services/CacheKeys";
 import { useQueryClient } from "react-query";
 import { useState } from "react";
+import { getPhotos } from "../utils/photos";
 import { formatPrice } from "../utils/formatPrice";
 
 export interface IConfirmDeleteListingDialogProps {
@@ -43,7 +44,7 @@ export const ConfirmDeleteListingDialog = (props: IConfirmDeleteListingDialogPro
         <Modal opened={props.opened} onClose={onClose} title="Are you sure you want to delete this listing?" centered pos="relative">
             <LoadingOverlay visible={isLoading} zIndex={1000} overlayProps={{ radius: "sm", blur: 2 }} />
             {error && <Text>{error.message}</Text>}
-            <Center><Image src={props.item.imgUrl} radius={'md'} h={200} w='auto' fit='contain' /></Center>
+            <Center><Image src={getPhotos(props.item)[0]} radius={'md'} h={200} w='auto' fit='contain' /></Center>
             <Group justify="space-between" mt="md" mb="xs">
                 <Text fw={500}>{props.item.name}</Text>
                 {props.item.price && <Badge color="green">{formatPrice(props.item.price)}</Badge>}
