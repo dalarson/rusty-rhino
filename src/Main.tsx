@@ -1,52 +1,53 @@
-import { AppShell, Group, Button } from "@mantine/core";
+import { AppShell, Group, Container } from "@mantine/core";
 import { Header } from "./header/Header";
 import { Inventory } from "./inventory/Inventory";
 import { Inquiries } from "./inquiries/Inquiries";
 import { ListingDetails } from "./inventory/ListingDetails";
 import { useAuth } from "./auth/useAuth";
+import { Landing } from "./landing/Landing";
 import { BrowserRouter, Routes, Route, Link, useLocation } from "react-router-dom";
+
+const links = [
+    { to: "/", label: "Home" },
+    { to: "/shop", label: "Shop" },
+];
 
 const Navigation = () => {
     const { isAdmin } = useAuth();
     const location = useLocation();
+    const all = isAdmin ? [...links, { to: "/inquiries", label: "Inquiries" }] : links;
 
     return (
-        <Group gap="xs">
-            <Button 
-                component={Link} 
-                to="/" 
-                variant={location.pathname === '/' ? 'filled' : 'subtle'}
-            >
-                Inventory
-            </Button>
-            {isAdmin && (
-                <Button 
-                    component={Link} 
-                    to="/inquiries" 
-                    variant={location.pathname === '/inquiries' ? 'filled' : 'subtle'}
-                >
-                    Inquiries
-                </Button>
-            )}
+        <Group gap="lg">
+            {all.map((l) => (
+                <Link key={l.to} to={l.to} className="nav-link" data-active={location.pathname === l.to}>
+                    {l.label}
+                </Link>
+            ))}
         </Group>
     );
 };
+
+const Page = ({ children }: { children: React.ReactNode }) => (
+    <Container size="lg" py="xl" className="fade-up">{children}</Container>
+);
 
 export const Main = (): JSX.Element => {
     return (
         <BrowserRouter>
             <AppShell
                 header={{ height: 60 }}
-                padding="md"
+                padding={0}
             >
-                <AppShell.Header>
+                <AppShell.Header className="site-header">
                     <Header title={"Rusty Rhino"} tabs={<Navigation />} />
                 </AppShell.Header>
                 <AppShell.Main>
                     <Routes>
-                        <Route path="/" element={<Inventory />} />
-                        <Route path="/listing/:id" element={<ListingDetails />} />
-                        <Route path="/inquiries" element={<Inquiries />} />
+                        <Route path="/" element={<Landing />} />
+                        <Route path="/shop" element={<Page><Inventory /></Page>} />
+                        <Route path="/listing/:id" element={<Page><ListingDetails /></Page>} />
+                        <Route path="/inquiries" element={<Page><Inquiries /></Page>} />
                     </Routes>
                 </AppShell.Main>
             </AppShell>

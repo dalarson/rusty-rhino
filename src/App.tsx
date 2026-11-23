@@ -5,6 +5,7 @@ import { AuthProvider } from './auth/AuthProvider';
 import { MantineProvider } from '@mantine/core';
 import ReactDOM from 'react-dom/client'
 import { Main } from './Main';
+import { theme } from './theme';
 import { QueryClient, QueryClientProvider } from 'react-query';
 
 const queryClient = new QueryClient({
@@ -19,7 +20,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
   <>
     <React.StrictMode>
       <QueryClientProvider client={queryClient}>
-        <MantineProvider defaultColorScheme='dark'>
+        <MantineProvider theme={theme} defaultColorScheme='light'>
           <AuthProvider>
             <Main />
           </AuthProvider>
