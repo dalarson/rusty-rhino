@@ -5,17 +5,19 @@ export type InventoryItem = {
     name: string;
     // a brief description of the item
     description: string;
-    // a URL to an image of the item
-    imgUrl: string
+    // ordered photo URLs; index 0 is the cover/thumbnail
+    imgUrls?: string[];
+    // legacy: a URL to the main image (superseded by imgUrls)
+    imgUrl?: string;
     // an optional price for the item
     price: number;
     // whether the item is currently spoken for / sold
     sold: boolean;
     // the type of the item, could correspond to the room in which it belongs.
     type: InventoryItemType;
-    // URLs for "before" photos
+    // legacy: URLs for "before" photos
     beforeImgUrls?: string[];
-    // URLs for "after" photos
+    // legacy: URLs for "after" photos
     afterImgUrls?: string[];
 }
 

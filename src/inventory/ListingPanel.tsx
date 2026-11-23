@@ -1,11 +1,13 @@
-import { Button, Drawer, FileInput, Image, Select, Stack, Text, TextInput } from "@mantine/core";
+import { Button, Drawer, Select, Stack, Text, TextInput } from "@mantine/core";
 import { useState } from "react";
 import { InventorySvc } from "../domain/services/InventorySvc";
 import { useForm } from "@mantine/form";
-import { InventoryItem, InventoryItemType } from "../domain/types/InventoryItem";
+import { InventoryItemType } from "../domain/types/InventoryItem";
 import { useQueryClient } from "react-query";
 import { CacheKeys } from "../domain/services/CacheKeys";
 import { IListingPanelProps } from "./IListingPanelProps";
+import { PhotoEntry, PhotoPicker } from "./PhotoPicker";
+import { getPhotos } from "../utils/photos";
 
 
 export const ListingPanel = (props: IListingPanelProps): JSX.Element => {
@@ -13,9 +15,8 @@ export const ListingPanel = (props: IListingPanelProps): JSX.Element => {
 
     // File upload state variables
     const inventorySvc = new InventorySvc();
-    const [file, setFile] = useState<File | null>(null);
-    const [beforeFiles, setBeforeFiles] = useState<File[]>([]);
-    const [afterFiles, setAfterFiles] = useState<File[]>([]);
+    const [photos, setPhotos] = useState<PhotoEntry[]>([]);
+    const [pickerKey, setPickerKey] = useState(0);
     const [error, setError] = useState<Error | null>(null);
 
     // loading state for mutation
@@ -47,55 +48,12 @@ export const ListingPanel = (props: IListingPanelProps): JSX.Element => {
     const onSubmit = async (values: typeof form.values) => {
         setLoading(true);
         try {
-            // if props.item is undefined we are adding an item
+            if (photos.length === 0) throw new Error("At least one photo is required");
+            const imgUrls = photos.map(p => p.url!);
             if (props.item == undefined) {
-                if (!file) throw new Error("Main image is required");
-
-                // Prepare all upload tasks
-                const uploadTasks = [inventorySvc.uploadImage(file).execute()];
-                beforeFiles.forEach(f => uploadTasks.push(inventorySvc.uploadImage(f).execute()));
-                afterFiles.forEach(f => uploadTasks.push(inventorySvc.uploadImage(f).execute()));
-
-                const urls = await Promise.all(uploadTasks);
-                const mainImgUrl = urls[0];
-                const beforeImgUrls = urls.slice(1, 1 + beforeFiles.length);
-                const afterImgUrls = urls.slice(1 + beforeFiles.length);
-
-                const inventoryDto: InventoryItem = {
-                    ...values,
-                    imgUrl: mainImgUrl,
-                    beforeImgUrls,
-                    afterImgUrls,
-                    sold: false
-                }
-                await inventorySvc.addInventoryItem(inventoryDto).execute();
+                await inventorySvc.addInventoryItem({ ...values, imgUrls, sold: false }).execute();
             } else {
-                // if an item was passed in we are editing the item
-                let beforeImgUrls = props.item.beforeImgUrls ?? [];
-                let afterImgUrls = props.item.afterImgUrls ?? [];
-
-                if (beforeFiles.length > 0 || afterFiles.length > 0) {
-                    const uploadTasks: Promise<string>[] = [];
-                    beforeFiles.forEach(f => uploadTasks.push(inventorySvc.uploadImage(f).execute()));
-                    afterFiles.forEach(f => uploadTasks.push(inventorySvc.uploadImage(f).execute()));
-                    
-                    const urls = await Promise.all(uploadTasks);
-                    const newBeforeUrls = urls.slice(0, beforeFiles.length);
-                    const newAfterUrls = urls.slice(beforeFiles.length);
-                    
-                    beforeImgUrls = [...beforeImgUrls, ...newBeforeUrls].slice(0, 3);
-                    afterImgUrls = [...afterImgUrls, ...newAfterUrls].slice(0, 3);
-                }
-
-                const inventoryItemDto: InventoryItem = {
-                    ...values,
-                    imgUrl: props.item.imgUrl,
-                    id: props.item.id,
-                    beforeImgUrls,
-                    afterImgUrls,
-                    sold: false
-                }
-                await inventorySvc.patchInventoryItem(inventoryItemDto).execute();
+                await inventorySvc.patchInventoryItem({ ...values, imgUrls, id: props.item.id, sold: false }).execute();
             }
 
             queryClient.invalidateQueries({ queryKey: CacheKeys.Inventory });
@@ -108,13 +66,17 @@ export const ListingPanel = (props: IListingPanelProps): JSX.Element => {
         }
     }
 
+    const photosReady = photos.length > 0 && photos.every(p => p.status === "done");
+    const photosDirty = props.item !== undefined &&
+        JSON.stringify(photos.map(p => p.url)) !== JSON.stringify(getPhotos(props.item));
+    const canSubmit = photosReady && (props.item === undefined || form.isDirty() || photosDirty);
+
     const onDismiss = () => {
         props.onDismiss();
         // clear state for next open of drawer
         setError(null);
-        setFile(null);
-        setBeforeFiles([]);
-        setAfterFiles([]);
+        setPhotos([]);
+        setPickerKey(k => k + 1);
         form.reset();
     }
 
@@ -122,41 +84,13 @@ export const ListingPanel = (props: IListingPanelProps): JSX.Element => {
         <Drawer position="right" opened={props.isOpen} onClose={onDismiss} title={props.item === undefined ? "Add a new listing" : "Edit a listing"}>
             <form onSubmit={form.onSubmit(onSubmit)}>
                 <Stack gap={"8px"}>
-                    {props.item == undefined && (
-                        <FileInput
-                            key={form.key('file')}
-                            label="Select main image"
-                            description="Make sure it's less than 2 MB, and .png or .jpg"
-                            placeholder="click here to upload..."
-                            onChange={setFile}
-                            required
-                        />
-                    )}
-                    
-                    <FileInput
-                        label="Before photos (max 3)"
-                        placeholder="Upload before photos..."
-                        multiple
-                        value={beforeFiles}
-                        onChange={(files) => setBeforeFiles(files.slice(0, 3))}
+                    <PhotoPicker
+                        key={pickerKey}
+                        initialUrls={props.item ? getPhotos(props.item) : []}
+                        onChange={setPhotos}
                     />
-
-                    <FileInput
-                        label="After photos (max 3)"
-                        placeholder="Upload after photos..."
-                        multiple
-                        value={afterFiles}
-                        onChange={(files) => setAfterFiles(files.slice(0, 3))}
-                    />
-
-                    {props.item && props.item.imgUrl && (
-                        <>
-                            <Text size="xs">Main image (not editable yet):</Text>
-                            <Image src={props.item.imgUrl} mah={100} w="auto" />
-                        </>
-                    )}
                     {error && <Text c="red">{error.message}</Text>}
-                    {((!props.item && file) || (props.item)) && <><TextInput
+                    {<><TextInput
                         withAsterisk
                         label="Name"
                         key={form.key('name')}
@@ -182,13 +116,13 @@ export const ListingPanel = (props: IListingPanelProps): JSX.Element => {
                         />
                         {props.item == undefined &&
                             <>
-                                {!isLoading && <Button style={{ marginTop: "12px" }} type="submit">Add listing!</Button>}
+                                {!isLoading && <Button style={{ marginTop: "12px" }} disabled={!canSubmit} type="submit">Add listing!</Button>}
                                 {isLoading && <Button style={{ marginTop: "12px" }} disabled={true} >Adding...</Button>}
                             </>
                         }
                         {props.item !== undefined &&
                             <>
-                                {!isLoading && <Button style={{ marginTop: "12px" }} disabled={!form.isDirty()} type="submit">Save listing!</Button>}
+                                {!isLoading && <Button style={{ marginTop: "12px" }} disabled={!canSubmit} type="submit">Save listing!</Button>}
                                 {isLoading && <Button style={{ marginTop: "12px" }} disabled={true} >Saving...</Button>}
                             </>
                         }

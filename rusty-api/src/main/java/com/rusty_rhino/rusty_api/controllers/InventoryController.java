@@ -57,9 +57,7 @@ public class InventoryController {
             existing.setPrice(item.getPrice());
             existing.setSold(item.isSold());
             existing.setType(item.getType());
-            existing.setImgUrl(item.getImgUrl());
-            existing.setBeforeImgUrls(item.getBeforeImgUrls());
-            existing.setAfterImgUrls(item.getAfterImgUrls());
+            existing.setImgUrls(item.getImgUrls());
             return repo.save(existing).getId().toString();
         } catch (Exception e) {
             String msg = e.getMessage();
