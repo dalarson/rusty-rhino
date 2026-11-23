@@ -28,7 +28,7 @@ export const ListingDetails = (): JSX.Element => {
         <Container size="md">
             <Stack align="center" mt="xl">
                 <Text size="xl" c="red">Error loading listing details.</Text>
-                <Button variant="subtle" onClick={() => navigate('/')}>Go back to inventory</Button>
+                <Button variant="subtle" onClick={() => navigate('/shop')}>Go back to inventory</Button>
             </Stack>
         </Container>
     );
@@ -39,11 +39,11 @@ export const ListingDetails = (): JSX.Element => {
                 <Button 
                     variant="subtle" 
                     leftSection={<IconArrowLeft size={16} />} 
-                    onClick={() => navigate('/')}
+                    onClick={() => navigate('/shop')}
                 >
-                    Back to Inventory
+                    Back to Shop
                 </Button>
-                <Button color="blue" radius="md" onClick={toggleInquiry}>
+                <Button color="rust" radius="md" onClick={toggleInquiry}>
                     I want this!
                 </Button>
             </Group>
@@ -64,10 +64,10 @@ const CardSection = ({ item }: { item: InventoryItem }) => (
         <Group justify="space-between" align="flex-start">
             <div>
                 <Title order={1}>{item.name}</Title>
-                <Badge size="lg" variant="light" color="blue" mt="xs">{item.type}</Badge>
+                <Badge size="lg" variant="light" color="rust" mt="xs">{item.type}</Badge>
             </div>
             {item.price > 0 && (
-                <Text fw={700} size="xl" c="blue">
+                <Text fw={700} size="xl" c="rust.6">
                     {formatPrice(item.price)}
                 </Text>
             )}

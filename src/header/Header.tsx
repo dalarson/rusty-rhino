@@ -1,4 +1,4 @@
-import { Group } from "@mantine/core";
+import { Group, Title } from "@mantine/core";
 import { IHeaderProps } from "./IHeaderProps"
 import { UserButton } from "./login/UserButton";
 import Rhino from '../../resources/logo/Rhino.svg';
@@ -6,6 +6,7 @@ import { useAuth } from "../auth/useAuth";
 import { LoginDialog } from "./login/LoginDialog";
 import { ICredentials } from "./login/ICredentials";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 export const Header = (props: IHeaderProps): JSX.Element => {
     document.title = props.title;
@@ -21,10 +22,10 @@ export const Header = (props: IHeaderProps): JSX.Element => {
     return (
         <Group h="100%" px="md" justify="space-between">
             <Group>
-                <img src={Rhino} alt='' width={"45px"} height={"30px"} />
-                <div>
-                    {props.title}
-                </div>
+                <Link to="/" style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none", color: "inherit" }}>
+                    <img src={Rhino} alt='' width={"45px"} height={"30px"} />
+                    <Title order={3} size="h3">{props.title}</Title>
+                </Link>
             </Group>
             {props.tabs}
             <UserButton onSignInClick={() => setLoginDialogOpen(true)} onSignOutClick={authContext.logout} />

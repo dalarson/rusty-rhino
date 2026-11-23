@@ -24,7 +24,7 @@ export const Listing = ({ item }: IListingProps): JSX.Element => {
 
     return (
         <>
-            <Card shadow={'xs'} padding={'md'} radius={'md'} withBorder >
+            <Card className="lift-card" shadow={'xs'} padding={'md'} radius={'lg'} withBorder >
                 <Card.Section>
                     {isAdmin &&
                         <Group justify="left" style={{ padding: "4px", position: 'relative', zIndex: 1 }}>
@@ -50,14 +50,14 @@ export const Listing = ({ item }: IListingProps): JSX.Element => {
                 </Card.Section>
                 <Group justify="space-between" mt="md" mb="xs">
                     <Text fw={500}>{item.name}</Text>
-                    {item.price && <Badge color="green">{formatPrice(item.price)}</Badge>}
+                    {item.price && <Badge color="rust" variant="light" size="lg">{formatPrice(item.price)}</Badge>}
                 </Group>
 
                 <Text size="sm" c="dimmed">
                     {item.description}
                 </Text>
 
-                <Button color="blue" fullWidth mt="md" radius="md" onClick={togglePostInquiry}>
+                <Button fullWidth mt="md" radius="xl" onClick={togglePostInquiry}>
                     I want this!
                 </Button>
             </Card>
