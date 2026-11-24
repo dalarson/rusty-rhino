@@ -41,7 +41,7 @@ const Hero = () => (
                         </Button>
                     </Group>
                 </Stack>
-                <Image className="hero-rhino" src={Rhino} alt="" w={280} visibleFrom="md" />
+                <Image className="hero-rhino" src={Rhino} alt="" w={440} maw="42%" visibleFrom="md" />
             </Group>
         </Container>
     </div>
