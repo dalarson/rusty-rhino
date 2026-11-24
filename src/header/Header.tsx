@@ -1,7 +1,7 @@
 import { Group, Title } from "@mantine/core";
 import { IHeaderProps } from "./IHeaderProps"
 import { UserButton } from "./login/UserButton";
-import Rhino from '../../resources/logo/Logo.png';
+import Rhino from '../../resources/logo/RhinoIcon.png';
 import { useAuth } from "../auth/useAuth";
 import { LoginDialog } from "./login/LoginDialog";
 import { ICredentials } from "./login/ICredentials";
@@ -23,7 +23,7 @@ export const Header = (props: IHeaderProps): JSX.Element => {
         <Group h="100%" px="md" justify="space-between">
             <Group>
                 <Link to="/" style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none", color: "inherit" }}>
-                    <img src={Rhino} alt='' height={"40px"} />
+                    <img src={Rhino} alt='' width={"60px"} />
                     <Title order={3} size="h3">{props.title}</Title>
                 </Link>
             </Group>
