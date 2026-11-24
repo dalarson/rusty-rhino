@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { Button, Card, Container, Group, Image, SimpleGrid, Stack, Text, ThemeIcon, Title } from "@mantine/core";
 import { IconArrowRight, IconHammer, IconMessageCircle, IconTruckDelivery } from "@tabler/icons-react";
-import Rhino from "../../resources/logo/Rhino.svg";
+import Rhino from "../../resources/logo/Logo.png";
 import { InventorySvc } from "../domain/services/InventorySvc";
 import { useApiRequest } from "../domain/services/ApiRequest";
 import { getPhotos } from "../utils/photos";
