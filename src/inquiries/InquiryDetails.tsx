@@ -8,7 +8,7 @@ import { InventorySvc } from "../domain/services/InventorySvc";
 import { CacheKeys } from "../domain/services/CacheKeys";
 import { useApiRequest } from "../domain/services/ApiRequest";
 import { ConfirmDeleteInquiryDialog } from "./ConfirmDeleteInquiryDialog";
-import { formatInquiryDate } from "./Inquiries";
+import { formatInquiryDate } from "../utils/formatInquiryDate";
 
 export const InquiryDetails = (): JSX.Element => {
     const { id } = useParams<{ id: string }>();
