@@ -2,6 +2,7 @@ import { AppShell, Group, Container } from "@mantine/core";
 import { Header } from "./header/Header";
 import { Inventory } from "./inventory/Inventory";
 import { Inquiries } from "./inquiries/Inquiries";
+import { InquiryDetails } from "./inquiries/InquiryDetails";
 import { ListingDetails } from "./inventory/ListingDetails";
 import { useAuth } from "./auth/useAuth";
 import { Landing } from "./landing/Landing";
@@ -48,6 +49,7 @@ export const Main = (): JSX.Element => {
                         <Route path="/shop" element={<Page><Inventory /></Page>} />
                         <Route path="/listing/:id" element={<Page><ListingDetails /></Page>} />
                         <Route path="/inquiries" element={<Page><Inquiries /></Page>} />
+                        <Route path="/inquiries/:id" element={<Page><InquiryDetails /></Page>} />
                     </Routes>
                 </AppShell.Main>
             </AppShell>

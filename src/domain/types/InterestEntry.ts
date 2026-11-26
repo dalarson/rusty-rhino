@@ -6,4 +6,5 @@ export type InterestEntry = {
     message?: string;
     inventoryItemId?: string;
     createdAt?: number;
+    addressed?: boolean;
 }

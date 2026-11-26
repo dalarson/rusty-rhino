@@ -15,6 +15,16 @@ export class InterestSvc extends BaseSvc {
         return new ApiRequest<InterestEntry[]>([CacheKeys.Interest], axiosConfig);
     }
 
+    getInterestById(id: string): ApiRequest<InterestEntry> {
+        const axiosConfig = this.axiosGetConfig(`${interestUrl}/${id}`);
+        return new ApiRequest<InterestEntry>([CacheKeys.Interest, id], axiosConfig);
+    }
+
+    setAddressed(id: string, addressed: boolean): ApiRequest<void> {
+        const axiosConfig = this.axiosPatchConfig(`${interestUrl}/${id}/addressed`, { addressed });
+        return new ApiRequest<void>([CacheKeys.Interest, id], axiosConfig);
+    }
+
     postInterest(inquiry: InterestEntry): ApiRequest<void> {
         const axiosConfig = this.axiosPostConfig(interestUrl, inquiry, "application/json");
         return new ApiRequest<void>([CacheKeys.Interest], axiosConfig);
