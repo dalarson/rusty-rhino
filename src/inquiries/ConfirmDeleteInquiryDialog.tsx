@@ -9,6 +9,7 @@ export interface IConfirmDeleteInquiryDialogProps {
     opened: boolean;
     onClose: () => void;
     entry: InterestEntry;
+    onDeleted?: () => void;
 }
 
 export const ConfirmDeleteInquiryDialog = (props: IConfirmDeleteInquiryDialogProps): JSX.Element => {
@@ -23,7 +24,9 @@ export const ConfirmDeleteInquiryDialog = (props: IConfirmDeleteInquiryDialogPro
         setIsLoading(true);
         await deleteEntryReq.execute().then(() => {
             queryClient.invalidateQueries({ queryKey: CacheKeys.Interest })
+            setIsLoading(false);
             props.onClose();
+            props.onDeleted?.();
         }).catch((error: Error) => {
             console.log("failed to delete inquiry");
             console.log(error);

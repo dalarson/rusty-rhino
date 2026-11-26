@@ -29,4 +29,6 @@ public class InterestEntry {
     private String inventoryItemId;
 
     private long createdAt;
+
+    private boolean addressed;
 }
